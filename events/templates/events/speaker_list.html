@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speakers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .speaker-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            background-color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .btn-add {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background-color: #45a049;
+        }
+
+        .speaker-bio {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center">🎤 Speakers</h1>
+
+        {% for speaker in speakers %}
+            <div class="speaker-card">
+                <h4>{{ speaker.name }}</h4>
+                <p class="speaker-bio">{{ speaker.bio }}</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-primary btn-sm">View</a>
+                    <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'speaker_delete' speaker.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info text-center">No speakers available.</div>
+        {% endfor %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'speaker_create' %}" class="btn btn-add">➕ Add New Speaker</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Details</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .details-card {
+            max-width: 700px;
+            margin: 60px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .details-card h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .details-card p {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .action-buttons a {
+            margin-right: 10px;
+        }
+
+        .btn-custom {
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="details-card">
+        <h1>{{ speaker.name }}</h1>
+        <p><strong>Bio:</strong> {{ speaker.bio }}</p>
+
+        <div class="action-buttons mt-4">
+            <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-primary btn-custom">✏️ Edit</a>
+            <a href="{% url 'speaker_delete' speaker.id %}" class="btn btn-danger btn-custom">🗑️ Delete</a>
+            <a href="{% url 'speaker_list' %}" class="btn btn-secondary btn-custom">⬅️ Back to List</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimized Schedule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h2 class="mb-4">Optimized Schedule</h2>
+
+    <!-- ✅ Messages block properly integrated here -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% for event in events %}
+        <div class="card my-3 shadow">
+            <div class="card-header bg-primary text-white">
+                <strong>{{ event.title }}</strong> - {{ event.date }} at {{ event.location }}
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for session in event.sessions.all %}
+                        <li class="list-group-item">
+                            <strong>{{ session.title }}</strong> 
+                            ({{ session.start_time }} - {{ session.end_time }})
+                            {% if session.speaker %}
+                                - Speaker: <span class="text-success">{{ session.speaker.name }}</span>
+                            {% else %}
+                                - <span class="text-danger">No speaker assigned</span>
+                            {% endif %}
+
+                            <!-- Form to assign speaker -->
+                            <form method="post" action="{% url 'assign_speaker' session.id %}" class="mt-2">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <select name="speaker_id" class="form-select">
+                                        <option value="">Select Speaker</option>
+                                        {% for speaker in speakers %}
+                                            <option value="{{ speaker.id }}" {% if session.speaker and session.speaker.id == speaker.id %}selected{% endif %}>
+                                                {{ speaker.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-success">Assign</button>
+                                </div>
+                            </form>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">No sessions scheduled.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% empty %}
+        <p>No events scheduled.</p>
+    {% endfor %}
+
+    {% if conflicts %}
+        <div class="alert alert-danger mt-4">
+            <h4>Schedule Conflicts Found:</h4>
+            <ul>
+                {% for event, conflict_list in conflicts %}
+                    <li><strong>{{ event.title }}</strong>:
+                        <ul>
+                            {% for session1, session2 in conflict_list %}
+                                <li>Conflict between 
+                                    "<strong>{{ session1.title }}</strong>" ({{ session1.start_time }} - {{ session1.end_time }}) 
+                                    and 
+                                    "<strong>{{ session2.title }}</strong>" ({{ session2.start_time }} - {{ session2.end_time }})
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if speaker_conflicts %}
+        <div class="alert alert-danger mt-4">
+            <h4>Speaker Conflicts Detected:</h4>
+            <ul>
+                {% for speaker, conflicts in speaker_conflicts.items %}
+                    <li><strong>{{ speaker.name }}</strong> has overlapping sessions:
+                        <ul>
+                            {% for session1, session2 in conflicts %}
+                                <li>"{{ session1.title }}" and "{{ session2.title }}" 
+                                    ({{ session1.start_time }} - {{ session1.end_time }})
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Scheduler</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        /* Header Styling */
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Navigation Styling */
+        .header nav a {
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .header nav a:hover {
+            text-decoration: underline;
+        }
+
+
+        /* Sidebar Styling */
+        .sidebar {
+            background-color: #007bff;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            margin-top: 10px;
+        }
+
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Main Content */
+        .content {
+            padding: 20px;
+            width: 1000px;
+        }
+
+        .table-primary {
+            background-color: #007bff;
+        }
+
+        /* Hide form by default */
+        .form-container {
+            /* display: none; */
+            margin-left: 0px;
+            margin-top: 3px;
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="header d-flex justify-content-between align-items-center px-4">
+        <div class="fw-bold">Event Scheduler</div>
+        <nav>
+            <a href="{% url 'event_list' %}" class="nav-link d-inline text-white mx-2">Events</a>
+            <a href="{% url 'session_list' %}" class="nav-link d-inline text-white mx-2">Sessions</a>
+            <a href="{% url 'speaker_list' %}" class="nav-link d-inline text-white mx-2">Speakers</a>  
+            <a href="{% url 'optimized_schedule' %}" class="nav-link d-inline text-white mx-2">Schedule</a>  
+            <a href="#" class="nav-link d-inline text-white mx-2">Logout</a> 
+            
+        </nav>
+    </div>
+
+
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar col-md-2">
+            <a href="{% url 'event_list' %}">Create Event</a>
+            <a href="{% url 'event_list' %}">View Events</a>
+        
+            <a href="{% url 'session_list' %}">View Sessions</a>
+            <a href="{% url 'speaker_create' %}">Create Speaker</a>
+            <a href="{% url 'speaker_list' %}">View Speakers</a>
+            <a href="{% url 'optimized_schedule' %}">Optimized Schedule</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content col-md-10">
+            <h2>Event List</h2>
+
+
+            <table class="table table-bordered">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>{{ event.title }}</td>
+                        <td>{{ event.date }}</td>
+                        <td>{{ event.location }}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm"
+                                onclick="location.href='{% url 'event_detail' event.pk %}'">View</button>
+                            <button class="btn btn-warning btn-sm"
+                                onclick="toggleForm('{{ event.pk }}', `{{ event.title|escapejs }}`, `{{ event.description|escapejs }}`, `{{ event.date }}`, `{{ event.location }}`)">
+                                Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm"
+                                onclick="location.href='{% url 'event_delete' event.pk %}'">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Add New Event Button -->
+            <button class="btn btn-success mb-3" onclick="toggleForm()">Add New Event</button>
+
+            <!-- Event Form (Initially Hidden) -->
+            <div class="form-container" id="eventForm">
+                <h4 id="formTitle">Create Event</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="id_title">Title:</label>
+                    <input class="form-control" type="text" name="title" id="id_title"
+                        value="{{ form.title.value|default:'' }}">
+
+                    <label for="id_description">Description:</label>
+                    <textarea class="form-control" name="description"
+                        id="id_description">{{ form.description.value|default:'' }}</textarea>
+
+                    <label for="id_date">Date:</label>
+                    <input class="form-control" type="date" name="date" id="id_date"
+                        value="{{ form.date.value|default:'' }}">
+
+                    <label for="id_location">Location:</label>
+                    <input class="form-control" type="text" name="location" id="id_location"
+                        value="{{ form.location.value|default:'' }}">
+
+                    <button class="btn btn-primary mt-3" type="submit">Save</button>
+                    <button class="btn btn-secondary mt-3" type="button" onclick="toggleForm()">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm(eventId = null, title = "", description = "", date = "", location = "") {
+            var formContainer = document.getElementById("eventForm");
+            var formTitle = document.getElementById("formTitle");
+            var formElement = document.querySelector("#eventForm form");
+
+            if (eventId) {
+                formTitle.innerText = "Edit Event";
+                formElement.action = `/events/event/${eventId}/edit/`;  // ✅ Corrected URL
+ // ✅ Corrected for Edit
+            } else {
+                formTitle.innerText = "Create Event";
+                formElement.action = `events/event/new/`;  // ✅ Corrected for Create
+            }
+
+            document.getElementById("id_title").value = title || "";
+            document.getElementById("id_description").value = description || "";
+            document.getElementById("id_date").value = date || "";
+            document.getElementById("id_location").value = location || "";
+
+            formContainer.style.display = "block";  // Ensure form is visible when opening
+        }
+
+    </script>
+
+</body>
+
+</html>
