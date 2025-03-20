@@ -4,7 +4,39 @@ from .forms import EventForm, SessionForm, SpeakerForm
 from django.db.models import Prefetch
 from django.contrib import messages
 from collections import defaultdict
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import AuthenticationForm
 
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('event_list')
+    else:
+        form = UserCreationForm()
+    return render(request, 'auth/register.html', {'form': form})
+
+def custom_login(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('event_list')  # Redirect where you want after login
+    else:
+        form = AuthenticationForm()
+    return render(request, 'auth/login.html', {'form': form})
+
+def custom_logout(request):
+    logout(request)
+    return redirect('login') 
+
+@login_required(login_url='login')
 def event_list(request):
     events = Event.objects.all()
     form = EventForm()
@@ -23,10 +55,12 @@ def event_list(request):
 
     return render(request, "events/event_list.html", {"events": events, "form": form})
 
+@login_required
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     return render(request, 'events/event_detail.html', {'event': event})
 
+@login_required
 def event_create(request):
     if request.method == "POST":
         form = EventForm(request.POST)
@@ -37,6 +71,7 @@ def event_create(request):
         form = EventForm()
     return render(request, 'events/event_form.html', {'form': form})
 
+@login_required
 def event_update(request, pk):
     event = get_object_or_404(Event, pk=pk)
     if request.method == "POST":
@@ -48,6 +83,7 @@ def event_update(request, pk):
         form = EventForm(instance=event)
     return render(request, 'events/event_form.html', {'form': form})
 
+@login_required
 def event_delete(request, pk):
     event = get_object_or_404(Event, pk=pk)
     if request.method == "POST":
@@ -55,12 +91,13 @@ def event_delete(request, pk):
         return redirect('event_list')
     return render(request, 'events/event_confirm_delete.html', {'event': event})
 
+@login_required
 def session_list(request):
     sessions = Session.objects.select_related('event').order_by('event__date', 'start_time')
     print(sessions)
     return render(request, "events/session_list.html", {"sessions": sessions})
 
-
+@login_required
 def session_create(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.method == 'POST':
@@ -74,6 +111,7 @@ def session_create(request, event_id):
         form = SessionForm()
     return render(request, 'events/session_form.html', {'form': form, 'event': event})
 
+@login_required
 def session_update(request, pk):
     session = get_object_or_404(Session, pk=pk)
     if request.method == "POST":
@@ -86,6 +124,7 @@ def session_update(request, pk):
     return render(request, 'events/session_form.html', {'form': form})
 
 
+@login_required
 def session_delete(request, pk):
     session = get_object_or_404(Session, pk=pk)
     if request.method == 'POST':
@@ -94,18 +133,21 @@ def session_delete(request, pk):
     return render(request, 'events/session_confirm_delete.html', {'session': session})
 
 
+@login_required
 def speaker_list(request):
     speakers = Speaker.objects.all()
     return render(request, 'events/speaker_list.html', {'speakers': speakers})
 
 # Speaker Detail View
 
+@login_required
 def speaker_detail(request, pk):
     speaker = get_object_or_404(Speaker, pk=pk)
     return render(request, 'events/speaker_detail.html', {'speaker': speaker})
 
 # Create Speaker
 
+@login_required
 def speaker_create(request):
     if request.method == 'POST':
         form = SpeakerForm(request.POST)
@@ -118,6 +160,7 @@ def speaker_create(request):
 
 # Edit Speaker
 
+@login_required
 def speaker_edit(request, pk):
     speaker = get_object_or_404(Speaker, pk=pk)
     if request.method == 'POST':
@@ -131,6 +174,7 @@ def speaker_edit(request, pk):
 
 # Delete Speaker
 
+@login_required
 def speaker_delete(request, pk):
     speaker = get_object_or_404(Speaker, pk=pk)
     if request.method == 'POST':
@@ -142,6 +186,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from .models import Session, Speaker
 
+@login_required
 def assign_speaker(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
 
@@ -172,6 +217,7 @@ def assign_speaker(request, session_id):
 
 
 
+@login_required
 def optimized_schedule_view(request):
     events = Event.objects.prefetch_related(
         Prefetch('sessions', queryset=Session.objects.select_related('speaker').order_by('start_time'))

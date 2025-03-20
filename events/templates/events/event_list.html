@@ -80,10 +80,16 @@
         <nav>
             <a href="{% url 'event_list' %}" class="nav-link d-inline text-white mx-2">Events</a>
             <a href="{% url 'session_list' %}" class="nav-link d-inline text-white mx-2">Sessions</a>
-            <a href="{% url 'speaker_list' %}" class="nav-link d-inline text-white mx-2">Speakers</a>  
-            <a href="{% url 'optimized_schedule' %}" class="nav-link d-inline text-white mx-2">Schedule</a>  
-            <a href="#" class="nav-link d-inline text-white mx-2">Logout</a> 
-            
+            <a href="{% url 'speaker_list' %}" class="nav-link d-inline text-white mx-2">Speakers</a>
+            <a href="{% url 'optimized_schedule' %}" class="nav-link d-inline text-white mx-2">Schedule</a>
+
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="nav-link d-inline text-white mx-2">Logout</a>
+            {% else %}
+            <a href="{% url 'login' %}" class="nav-link d-inline text-white mx-2">Login</a>
+            {% endif %}
+        
+
         </nav>
     </div>
 
@@ -93,7 +99,7 @@
         <div class="sidebar col-md-2">
             <a href="{% url 'event_list' %}">Create Event</a>
             <a href="{% url 'event_list' %}">View Events</a>
-        
+
             <a href="{% url 'session_list' %}">View Sessions</a>
             <a href="{% url 'speaker_create' %}">Create Speaker</a>
             <a href="{% url 'speaker_list' %}">View Speakers</a>
@@ -175,7 +181,7 @@
             if (eventId) {
                 formTitle.innerText = "Edit Event";
                 formElement.action = `/events/event/${eventId}/edit/`;  // ✅ Corrected URL
- // ✅ Corrected for Edit
+                // ✅ Corrected for Edit
             } else {
                 formTitle.innerText = "Create Event";
                 formElement.action = `events/event/new/`;  // ✅ Corrected for Create

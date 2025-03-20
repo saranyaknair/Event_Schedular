@@ -1,10 +1,17 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
+    path('login/', views.custom_login, name='login'),
+    path('logout/', views.custom_logout, name='logout'),
+    path('register/', views.register, name='register'),
+
+    # Protect event and other views
     path('', views.event_list, name='event_list'),
     path('event/<int:event_id>/', views.event_detail, name='event_detail'),
-    path('event/new/', views.event_create, name='event_create'),
+    path('events/event/new/', views.event_create, name='event_create'),
     path('event/<int:pk>/edit/', views.event_update, name='event_update'),
     path('event/<int:pk>/delete/', views.event_delete, name='event_delete'),
 
